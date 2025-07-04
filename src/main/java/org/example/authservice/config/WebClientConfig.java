@@ -10,13 +10,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebClientConfig implements WebMvcConfigurer {
-    @Autowired
-    private PermissionInterceptor permissionInterceptor;
-
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(permissionInterceptor);
-    }
     @Bean
     public WebClient webClient() {
         return WebClient.builder().baseUrl("http://localhost:8080").build();

@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.example.authservice.model.dto.UserInforResponse;
 import org.example.authservice.model.dto.UsersResponse;
-import org.example.authservice.model.entity.Permissions;
 import org.example.authservice.model.entity.Users;
 import org.example.authservice.utils.GenerateUser;
 import org.springframework.stereotype.Component;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -36,11 +34,7 @@ public class JwtUtils {
         return Jwts.builder()
                 .setSubject(users.getId().toString())
                 .claim(TOKEN_TYPE, type)
-                .claim("roles", users.getRole().getName())
-                .claim("permissions", users.getRole().getPermissions()
-                        .stream()
-                        .map(Permissions::getName)
-                        .collect(Collectors.toList()))
+                .claim("roles", users.getRole())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + TOKEN_EXPIRATION))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -57,7 +51,6 @@ public class JwtUtils {
                     .getBody();
 
             String tokenType = claims.get("token_type", String.class);
-            List permissions = claims.get("permissions", List.class);
             String role = claims.get("roles", String.class);
             if (tokenType == null) {
                 System.out.println("Token không có loại xác định (token_type)");

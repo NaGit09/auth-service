@@ -8,13 +8,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.example.authservice.model.entity.CustomUserDetails;
 import org.example.authservice.model.entity.Users;
 import org.example.authservice.model.repository.UsersRepository;
 import org.example.authservice.service.CustomUserDetailsService;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -41,13 +41,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-
+        // skip request is not authenticated
         String path = request.getServletPath();
         if (PUBLIC_PATHS.contains(path)) {
             filterChain.doFilter(request, response);
             return;
         }
-
+        // check header
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             handleError(response, "Missing token");
@@ -55,7 +55,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String token = authHeader.substring(7);
-
+        // check token type
         try {
             if (!jwtUtil.validateToken(token, "access_token")) {
                 handleError(response, "Invalid token");
@@ -70,12 +70,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // required, if not this 403 error.
             if (SecurityContextHolder.getContext().getAuthentication() == null) {
                 assert user != null;
-                UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
-
+                // get user with UserDetailService
+                CustomUserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
+                // authentication and authorization with user entity
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken
                                 (userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                // add auth token in Security context holder
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
 
@@ -83,7 +85,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             handleError(response, "Token error: " + e.getMessage());
             return;
         }
-
         filterChain.doFilter(request, response);
     }
 

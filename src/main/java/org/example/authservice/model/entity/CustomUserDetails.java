@@ -17,7 +17,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(users.getRole().getName()));
+        return List.of(new SimpleGrantedAuthority(users.getRole()));
     }
 
     @Override
@@ -29,4 +29,10 @@ public class CustomUserDetails implements UserDetails {
     public String getUsername() {
         return users.getUsername();
     }
+
+    @Override
+    public boolean isEnabled() {
+        return users.isActive() && !users.is_ban();
+    }
+
 }

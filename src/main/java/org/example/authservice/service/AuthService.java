@@ -2,9 +2,7 @@ package org.example.authservice.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.authservice.model.dto.UsersRegister;
-import org.example.authservice.model.entity.Roles;
 import org.example.authservice.model.entity.Users;
-import org.example.authservice.model.repository.RolesRepository;
 import org.example.authservice.model.repository.UsersRepository;
 import org.example.authservice.utils.GenerateUser;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,7 +15,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthService implements IAuthService {
     public final UsersRepository usersRepository;
-    public final RolesRepository rolesRepository;
+
     private final PasswordEncoder passwordEncoder;
     @Override
     public boolean register(UsersRegister usersRegister) {
@@ -28,10 +26,9 @@ public class AuthService implements IAuthService {
         if(usersRepository.existsByEmail(email)) {
             return false;
         }
-        Roles defaultRole = rolesRepository.findByName("ROLE_USER");
         String encodedPassword = passwordEncoder.encode(rawPassword);
         // SAVE USER INTO DB
-        Users u = GenerateUser.generateUserRegister(email, username, encodedPassword , defaultRole);
+        Users u = GenerateUser.generateUserRegister(email, username, encodedPassword , "USER");
         usersRepository.save(u);
         return true;
     }

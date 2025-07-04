@@ -1,10 +1,10 @@
 package org.example.authservice.controller;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
-import org.example.authservice.config.RequiresPermission;
 import org.example.authservice.jwt.JwtUtils;
 import org.example.authservice.model.dto.*;
 import org.example.authservice.model.entity.Users;
@@ -12,6 +12,7 @@ import org.example.authservice.service.AuthService;
 import org.example.authservice.utils.GenerateUser;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -31,7 +32,7 @@ public class AuthController {
     public long refreshTime = 1000 * 60 * 60 * 24 * 7;
 
     // constant messageResponse
-    @RequiresPermission("USER_VIEW")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER' ,'USER')")
     @GetMapping("/") // Test application
     public ResponseEntity<?> helloSpring(HttpServletRequest request) {
         return ResponseEntity.ok(new APIResponse<>(
@@ -53,7 +54,7 @@ public class AuthController {
             // Trả về response lỗi khi không tìm thấy người dùng
             return ResponseEntity.badRequest()
                     .body(new ErrorResponse(
-HttpStatus.NO_CONTENT.value(),
+                            HttpStatus.NO_CONTENT.value(),
                             "Incorrect email , password !"
                     ));
         }
@@ -122,6 +123,7 @@ HttpStatus.NO_CONTENT.value(),
     }
 
     // user logout, remove token after user logout
+    @RolesAllowed({"ADMIN", "USER" , "VIP" , "BAN"})
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestBody UsersResponse body) {
         String accessToken = body.getToken();
@@ -137,7 +139,6 @@ HttpStatus.NO_CONTENT.value(),
             );
         }
         UUID uuid = UUID.fromString(jwtUtils.getUserIdFromToken(accessToken));
-
         Optional<Users> user = authService.findUserById(uuid);
         return ResponseEntity.ok(new APIResponse<>(
                 HttpStatus.OK.value(),

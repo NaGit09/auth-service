@@ -3,9 +3,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.authservice.model.entity.Permissions;
-
-import java.util.List;
 
 @Data
 @Builder
@@ -18,6 +15,5 @@ public class UserInforResponse {
     private String avatar_url;
     private String full_name;
     private String role;
-    private List<Permissions> permissions;
 
 }

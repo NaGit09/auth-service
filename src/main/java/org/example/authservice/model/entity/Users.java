@@ -44,9 +44,8 @@ public class Users {
     @Column(name = "avatar_url", columnDefinition = "TEXT")
     private String avatar_url;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role_id")
-    private Roles role;
+
+    private String role;
 
     @Column(nullable = false)
     private boolean active = true;
