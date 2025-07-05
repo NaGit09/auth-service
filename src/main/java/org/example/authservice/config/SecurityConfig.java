@@ -29,7 +29,9 @@ public class SecurityConfig {
         return http.csrf(AbstractHttpConfigurer::disable)
                 // declare ignore request
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/auth/login", "/auth/register", "/auth/refresh-token")
+                        auth.requestMatchers("/auth-service/auth/login",
+                                        "/auth-service/auth/register",
+                                        "/auth-service/auth/refresh-token")
                                 .permitAll()
                 // another request is authenticated
                                 .anyRequest().authenticated())

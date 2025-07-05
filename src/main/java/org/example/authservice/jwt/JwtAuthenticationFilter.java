@@ -34,7 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UsersRepository userRepository;
     private final CustomUserDetailsService userDetailsService;
     private static final List<String> PUBLIC_PATHS = List.of(
-            "/auth/login", "/auth/register", "/auth/refresh-token"
+            "/auth-service/auth/login", "/auth-service/auth/register", "/auth-service/auth/refresh-token"
     );
 
     // filter request

@@ -21,9 +21,10 @@ public class AuthService implements IAuthService {
     public boolean register(UsersRegister usersRegister) {
         String email = usersRegister.getEmail();
         String username = usersRegister.getUsername();
-        String rawPassword = usersRegister.getPassword_hash();
-
+        String rawPassword = usersRegister.getPassword();
+        System.out.println(username + " " + rawPassword);
         if(usersRepository.existsByEmail(email)) {
+            System.out.println("Email existed !");
             return false;
         }
         String encodedPassword = passwordEncoder.encode(rawPassword);

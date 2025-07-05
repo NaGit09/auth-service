@@ -9,12 +9,14 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
-import java.util.UUID;
 @Repository
 public interface UsersRepository extends JpaRepository<Users, UUID> {
-    boolean existsByEmail(String email);
+    // custom query
     @Query("SELECT u.password_hash FROM Users u WHERE u.email = :email")
     String getPasswordByEmail(@Param("email") String email);
+
+    boolean existsByEmail(String email);
+
     Optional<Users> findByEmail(String email);
     Optional<Users> findById(UUID id);
 }

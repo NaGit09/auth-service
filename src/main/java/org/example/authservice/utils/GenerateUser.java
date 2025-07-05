@@ -12,10 +12,10 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class GenerateUser {
-    public static final String DEFAULT_AVATAR = "https://res.cloudinary.com/dtnffqndg/image/upload/v1750932513/i9gkkhogvphlfy2t6m06.jpg";
+    public static final String DEFAULT_AVATAR =
+            "https://res.cloudinary.com/dtnffqndg/image/upload/v1750932513/i9gkkhogvphlfy2t6m06.jpg";
 
     public static Users generateUserRegister(String email, String username, String password, String defaultRole) {
-
         return Users.builder()
                 .id(UUID.randomUUID())
                 .email(email)

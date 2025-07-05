@@ -21,7 +21,7 @@ import java.util.UUID;
 
 
 @RestController
-@RequestMapping("/auth") // declare request mapping url
+@RequestMapping("/auth-service/auth") // declare request mapping url
 @RequiredArgsConstructor
 public class AuthController {
     // DI
@@ -47,7 +47,7 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody UsersLogin usersLogin, HttpServletResponse response) {
         // Phase 1: Authentication user
         String email = usersLogin.getEmail();
-        String password = usersLogin.getPassword_hash();
+        String password = usersLogin.getPassword();
         Optional<Users> user = authService.login(email, password);
 
         if (user.isEmpty()) {
