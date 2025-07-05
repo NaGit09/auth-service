@@ -1,4 +1,15 @@
 package org.example.authservice.service;
 
-public class IFollowService {
+import org.example.authservice.model.dto.FollowRequestClient;
+
+import java.util.UUID;
+
+public interface IFollowService {
+    Boolean followUser(FollowRequestClient followRequestClient);
+
+    Boolean unfollowUser(FollowRequestClient followRequestClient);
+
+    Integer totalFollower(UUID userId);
+
+    Integer totalFollowing(UUID userId);
 }

@@ -1,5 +1,5 @@
 package org.example.authservice.constant;
 
-public enum MODES {
+public enum Mode {
     PUBLIC , PRIVATE , VIP
 }

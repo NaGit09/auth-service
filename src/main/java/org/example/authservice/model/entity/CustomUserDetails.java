@@ -17,12 +17,12 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(users.getRole()));
+        return List.of(new SimpleGrantedAuthority(users.getRole().name()));
     }
 
     @Override
     public String getPassword() {
-        return users.getPassword_hash();
+        return users.getPasswordHash();
     }
 
     @Override
@@ -32,7 +32,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return users.isActive() && !users.is_ban();
+        return users.isActive() && !users.isBanned();
     }
 
 }

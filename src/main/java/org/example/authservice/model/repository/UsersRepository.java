@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public interface UsersRepository extends JpaRepository<Users, UUID> {
     // custom query
-    @Query("SELECT u.password_hash FROM Users u WHERE u.email = :email")
+    @Query("SELECT u.passwordHash FROM Users u WHERE u.email = :email")
     String getPasswordByEmail(@Param("email") String email);
 
     boolean existsByEmail(String email);

@@ -3,73 +3,84 @@ package org.example.authservice.model.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import org.example.authservice.constant.MODES;
+import org.example.authservice.constant.Mode;
+import org.example.authservice.constant.Role;
 
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity
-@Table(name = "users")
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Entity
+@Table(name = "users")
 public class Users {
 
     @Id
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
+    @NotBlank
+    @Size(max = 50)
     @Column(nullable = false, unique = true, length = 50)
-    @NotBlank(message = "Username is required")
     private String username;
 
+    @NotBlank
+    @Email
+    @Size(max = 100)
     @Column(nullable = false, unique = true, length = 100)
-    @Email(message = "Email should be valid")
-    @NotBlank(message = "Email is required")
     private String email;
 
+    @NotBlank
     @Column(name = "password_hash", nullable = false, length = 255)
-    @NotBlank(message = "Password is required")
-    private String password_hash;
+    private String passwordHash;
 
+    @Size(max = 100)
     @Column(name = "full_name", length = 100)
-    private String full_name;
+    private String fullName;
 
-    @Column(name = "avatar_url", columnDefinition = "TEXT")
-    private String avatar_url;
+    @Lob
+    @Column(name = "avatar_url")
+    private String avatarUrl;
 
-
-    private String role;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10, nullable = false)
+    private Role role = Role.USER;
 
     @Column(nullable = false)
     private boolean active = true;
 
-    @Column(name = "is_ban", nullable = false)
-    private boolean is_ban = false;
+    @Column(name = "is_banned", nullable = false)
+    private boolean isBanned = false;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private MODES mode = MODES.PUBLIC;
+    private Mode mode = Mode.PUBLIC;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime created_at;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updated_at;
+    private LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
-        this.created_at = this.updated_at = LocalDateTime.now();
+        this.createdAt = this.updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        this.updated_at = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
+
+
 }
+

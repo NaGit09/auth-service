@@ -1,6 +1,7 @@
 package org.example.authservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.authservice.constant.Role;
 import org.example.authservice.model.dto.UsersRegister;
 import org.example.authservice.model.entity.Users;
 import org.example.authservice.model.repository.UsersRepository;
@@ -29,7 +30,7 @@ public class AuthService implements IAuthService {
         }
         String encodedPassword = passwordEncoder.encode(rawPassword);
         // SAVE USER INTO DB
-        Users u = GenerateUser.generateUserRegister(email, username, encodedPassword , "USER");
+        Users u = GenerateUser.generateUserRegister(email, username, encodedPassword , Role.USER);
         usersRepository.save(u);
         return true;
     }
