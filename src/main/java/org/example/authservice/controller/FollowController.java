@@ -13,12 +13,14 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/auth-service/follows")
 public class FollowController {
+
     @Autowired
     FollowService followService;
 
 
     @PostMapping("/follows-user")
-    public ResponseEntity<?> followUser(@RequestBody FollowRequestClient followRequestClient) {
+    public ResponseEntity<?> followUser
+            (@RequestBody FollowRequestClient followRequestClient) {
         boolean follow = followService.followUser(followRequestClient);
 
         if (!follow) {
@@ -30,7 +32,8 @@ public class FollowController {
     }
 
     @PostMapping("/unfollow-user")
-    public ResponseEntity<?> unfollowUser(@RequestBody FollowRequestClient followRequestClient) {
+    public ResponseEntity<?> unfollowUser
+            (@RequestBody FollowRequestClient followRequestClient) {
         boolean unfollow = followService.unfollowUser(followRequestClient);
         if (!unfollow) {
             return GenerateResponse.generateError(HttpStatus.BAD_REQUEST.value(),

@@ -26,8 +26,12 @@ public class FollowService implements IFollowService {
 
     @Override
     public Boolean followUser(FollowRequestClient followRequestClient) {
-        Users userRequest = usersRepository.findById(followRequestClient.getRequesterId()).orElse(null);
-        Users userTarget = usersRepository.findById(followRequestClient.getTargetId()).orElse(null);
+        Users userRequest = usersRepository.findById
+                (followRequestClient.getRequesterId()).orElse(null);
+
+        Users userTarget = usersRepository.findById
+                (followRequestClient.getTargetId()).orElse(null);
+
         boolean checkUser = CompareUser.CompareUserFollow(userRequest, userTarget);
         if (!checkUser) {
             return false;
@@ -43,9 +47,11 @@ public class FollowService implements IFollowService {
                 System.out.println("User not follow yourself !");
                 return false;
             }
-            GenerateFollows.generateUserRequest(userRequest, userTarget, followsRequestsRepository);
+            GenerateFollows.generateUserRequest
+                    (userRequest, userTarget, followsRequestsRepository);
         } else {
-            GenerateFollows.generateUserFollow(userRequest, userTarget, followsRepository);
+            GenerateFollows.generateUserFollow
+                    (userRequest, userTarget, followsRepository);
         }
         return true;
     }

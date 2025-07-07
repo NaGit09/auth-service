@@ -51,7 +51,6 @@ public class JwtUtils {
                     .getBody();
 
             String tokenType = claims.get("token_type", String.class);
-            String role = claims.get("roles", String.class);
             if (tokenType == null) {
                 System.out.println("Token không có loại xác định (token_type)");
                 return false;

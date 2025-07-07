@@ -1,22 +1,16 @@
 package org.example.authservice.controller;
 
-import jakarta.annotation.security.RolesAllowed;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
-import org.example.authservice.jwt.JwtUtils;
 import org.example.authservice.model.dto.*;
-import org.example.authservice.model.entity.Users;
 import org.example.authservice.service.AuthService;
-import org.example.authservice.utils.GenerateUser;
-import org.springframework.http.HttpStatus;
+import org.example.authservice.utils.GenerateResponse;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 
@@ -26,124 +20,47 @@ import java.util.UUID;
 public class AuthController {
     // DI
     public final AuthService authService;
-    public final JwtUtils jwtUtils;
-    // time of token expired
-    public long expirationTime = 1000 * 60 * 60 * 15;
-    public long refreshTime = 1000 * 60 * 60 * 24 * 7;
-
-    // constant messageResponse
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER' ,'USER')")
-    @GetMapping("/") // Test application
-    public ResponseEntity<?> helloSpring(HttpServletRequest request) {
-        return ResponseEntity.ok(new APIResponse<>(
-                HttpStatus.OK.value(),
-                "SUCCESSFULLY",
-                "SUCCESSFULLY"
-        ));
-    }
-
     // user login with email, password
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UsersLogin usersLogin, HttpServletResponse response) {
-        // Phase 1: Authentication user
-        String email = usersLogin.getEmail();
-        String password = usersLogin.getPassword();
-        Optional<Users> user = authService.login(email, password);
-
-        if (user.isEmpty()) {
-            // Trả về response lỗi khi không tìm thấy người dùng
-            return ResponseEntity.badRequest()
-                    .body(new ErrorResponse(
-                            HttpStatus.NO_CONTENT.value(),
-                            "Incorrect email , password !"
-                    ));
-        }
-        // Phase 2: Generate tokens and save them into database
-        UUID userId = user.get().getId();
-        String accessToken = jwtUtils.generateToken(user.get(), expirationTime, "access_token");
-        String refreshToken = jwtUtils.generateToken(user.get(), refreshTime, "refresh_token");
-        UserInforResponse user_infor = GenerateUser.generateUserInfor(user.get());
-
-        // Phase 3: Response with status, message, and tokens
-        return ResponseEntity.ok(new APIResponse<>(
-                HttpStatus.OK.value(),
-                "LOGIN SUCCESSFULLY",
-                new UsersResponse(user_infor, accessToken, refreshToken)));
+    public ResponseEntity<?> login(@RequestBody UsersLogin usersLogin) {
+        return authService.login(usersLogin);
     }
 
     // user registry new account
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UsersRegister usersRegister) {
-        boolean success = authService.register(usersRegister);
-        if (!success) {
-            return ResponseEntity.badRequest()
-                    .body(new ErrorResponse(
-                            HttpStatus.NO_CONTENT.value(),
-                            "Infor invalid !"
-                    ));
-
-        }
-        return ResponseEntity.ok(new APIResponse<>(
-                HttpStatus.OK.value(),
-                "REGISTER SUCCESSFULLY",
-                ""
-        ));
+        return authService.register(usersRegister);
     }
 
     // refresh token if access token is expired!
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> body) {
+        if (body == null) {
+            return GenerateResponse.generateError(401, "body is null ! ");
+        }
         String refreshToken = body.get("refreshToken");
-        if (refreshToken == null || !jwtUtils.validateToken(refreshToken, "refresh_token")) {
-            System.out.println("Refresh token timeout");
+        return authService.refreshToken(refreshToken);
+    }
 
-            return ResponseEntity.badRequest().body(
-                    new ErrorResponse(
-                            HttpStatus.FORBIDDEN.value(),
-                            "Refresh token invalid !"
-                    )
-            );
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @GetMapping("/infor/{id}")
+    public ResponseEntity<?> getUserInfo(UUID userId) {
+        if (userId == null) {
+            return GenerateResponse.generateError(401, "userId is null ! ");
         }
-        String userId = jwtUtils.getUserIdFromToken(refreshToken);
-        Optional<Users> user = authService.findUserById(UUID.fromString(userId));
-        if (user.isEmpty()) {
-            return ResponseEntity.badRequest().body(
-                    new ErrorResponse(
-                            HttpStatus.FORBIDDEN.value(),
-                            "User not found !"
-                    )
-            );
-        }
-        String newAccessToken = jwtUtils.generateToken(user.get(), expirationTime, "access_token");
-        return ResponseEntity.ok(new APIResponse<>(
-                HttpStatus.OK.value(),
-                "LOGIN SUCCESSFULLY",
-                Map.of("accessToken", newAccessToken)
-        ));
+        return authService.userInfor(userId);
     }
 
     // user logout, remove token after user logout
-    @RolesAllowed({"ADMIN", "USER" , "VIP" , "BAN"})
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestBody UsersResponse body) {
+        if (body == null) {
+            return GenerateResponse.generateError(401, "body is null ! ");
+        }
+
         String accessToken = body.getToken();
         String refreshToken = body.getRefreshToken();
-        if (refreshToken == null || accessToken == null ||
-                !jwtUtils.validateToken(refreshToken, "refresh_token")
-                || !jwtUtils.validateToken(accessToken, "access_token")) {
-            return ResponseEntity.badRequest().body(
-                    new ErrorResponse(
-                            HttpStatus.FORBIDDEN.value(),
-                            "Refresh token invalid !"
-                    )
-            );
-        }
-        UUID uuid = UUID.fromString(jwtUtils.getUserIdFromToken(accessToken));
-        Optional<Users> user = authService.findUserById(uuid);
-        return ResponseEntity.ok(new APIResponse<>(
-                HttpStatus.OK.value(),
-                "successfully",
-                jwtUtils.TimeOutToken(user.get(), accessToken, refreshToken)
-        ));
+        return authService.logout(accessToken, refreshToken);
     }
 }
