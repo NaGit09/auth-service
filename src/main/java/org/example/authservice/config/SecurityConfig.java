@@ -27,20 +27,22 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)
-                // declare ignore request
-                .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/auth-service/auth/login",
-                                        "/auth-service/auth/register",
-                                        "/auth-service/auth/refresh-token",
-                                        "/auth-service/users/infor/{id}")
-                                .permitAll()
-                                // another request is authenticated
-                                .anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/auth-service/auth/login",
+                                "/auth-service/auth/register",
+                                "/auth-service/auth/refresh-token",
+                                "/auth-service/users/infor/**"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
                 .addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

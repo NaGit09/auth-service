@@ -36,7 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final List<String> PUBLIC_PATHS = List.of(
             "/auth-service/auth/login", "/auth-service/auth/register",
-            "/auth-service/auth/refresh-token", "/auth-service/auth/infor"
+            "/auth-service/auth/refresh-token", "/auth-service/users/infor"
     );
 
     private static final String TOKEN_TYPE = "access_token";
@@ -45,7 +45,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         String path = request.getServletPath();
-        boolean isPublic = PUBLIC_PATHS.stream().anyMatch(path::startsWith);
+        boolean isPublic = PUBLIC_PATHS.stream()
+                .anyMatch(path::startsWith);
 
         if (isPublic) {
             filterChain.doFilter(request, response);
