@@ -1,10 +1,13 @@
 package org.example.authservice.service;
 
-import org.springframework.http.ResponseEntity;
+import org.example.authservice.model.dto.user.UserInforResponse;
 
 import java.util.UUID;
 
 public interface IUserService {
-    ResponseEntity<?> updateAvatar (UUID userId, String avatarUrl);
+
+    UserInforResponse userInfor(UUID userId);
+
+    UserInforResponse updateAvatar (UUID userId, String avatarUrl);
 
 }

@@ -1,4 +1,4 @@
-package org.example.authservice.model.dto;
+package org.example.authservice.model.dto.follow;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

@@ -1,23 +1,19 @@
 package org.example.authservice.service;
 
-import org.example.authservice.model.dto.UsersLogin;
-import org.example.authservice.model.dto.UsersRegister;
-import org.example.authservice.model.entity.Users;
-import org.springframework.http.ResponseEntity;
+import org.example.authservice.model.dto.auth.UsersLogin;
+import org.example.authservice.model.dto.auth.UsersRegister;
+import org.example.authservice.model.dto.user.UsersResponse;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.Map;
 
 public interface IAuthService {
-    ResponseEntity<?> login(UsersLogin usersLogin);
+    UsersResponse login(UsersLogin usersLogin);
 
-    ResponseEntity<?> register(UsersRegister usersRegister);
+    UsersResponse register(UsersRegister usersRegister);
 
-    ResponseEntity<?> refreshToken(String refreshToken);
+    Map<String , String> refreshToken(String refreshToken);
 
-    ResponseEntity<?> logout(String accessToken, String refreshToken);
-
-    ResponseEntity<?> userInfor(UUID userId);
+    UsersResponse logout(String accessToken, String refreshToken);
 
     boolean checkPassword(String email, String password);
 }

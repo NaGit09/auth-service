@@ -1,7 +1,7 @@
 package org.example.authservice.service;
 
 import org.example.authservice.constant.Mode;
-import org.example.authservice.model.dto.FollowRequestClient;
+import org.example.authservice.model.dto.follow.FollowRequestClient;
 import org.example.authservice.model.entity.Users;
 import org.example.authservice.model.repository.FollowsRepository;
 import org.example.authservice.model.repository.FollowsRequestsRepository;

@@ -31,9 +31,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/auth-service/auth/login",
                                         "/auth-service/auth/register",
-                                        "/auth-service/auth/refresh-token")
+                                        "/auth-service/auth/refresh-token",
+                                        "/auth-service/users/infor/{id}")
                                 .permitAll()
-                // another request is authenticated
+                                // another request is authenticated
                                 .anyRequest().authenticated())
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -47,7 +48,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager
+            (AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 }

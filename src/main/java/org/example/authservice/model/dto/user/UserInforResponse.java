@@ -1,9 +1,8 @@
-package org.example.authservice.model.dto;
+package org.example.authservice.model.dto.user;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.authservice.constant.Role;
 
 import java.util.UUID;
 
@@ -15,9 +14,5 @@ import java.util.UUID;
 public class UserInforResponse {
     private UUID userId;
     private String username;
-    private String email;
     private String avatar_url;
-    private String full_name;
-    private Role role;
-
 }

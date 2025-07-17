@@ -4,94 +4,87 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 
-import org.example.authservice.model.dto.UserInforResponse;
-import org.example.authservice.model.dto.UsersResponse;
+import org.example.authservice.model.dto.user.UserInforResponse;
+import org.example.authservice.model.dto.user.UsersResponse;
 import org.example.authservice.model.entity.Users;
 import org.example.authservice.utils.GenerateUser;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
-import java.util.List;
 
-@Component
 @Slf4j
+@Component
 public class JwtUtils {
 
-    private static final String SECRET_KEY = "SK40CSI2PC-D#?4klj50fdl3kd3ldư;l3ke";
+    @Value("${jwt.secret}")
+    private String secretKey;
+
     private static final String TOKEN_TYPE = "token_type";
     private static final String ACCESS_TOKEN = "access_token";
     private static final String REFRESH_TOKEN = "refresh_token";
-    private static final Integer TOKEN_EXPIRATION = 0;
 
-    // generate signature from a private key
-    private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
-    }
+    public String generateToken
+            (Users user, long expirationMillis, String tokenType) {
 
-    // generate token from userId and time token expired
-    public String generateToken(Users users, long TOKEN_EXPIRATION, String type) {
         return Jwts.builder()
-                .setSubject(users.getId().toString())
-                .claim(TOKEN_TYPE, type)
-                .claim("roles", users.getRole())
+                .setSubject(user.getId().toString())
+                .claim(TOKEN_TYPE, tokenType)
+                .claim("roles", user.getRole())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + TOKEN_EXPIRATION))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
+    public boolean validateToken
+            (String token, String expectedTokenType) {
 
-    public boolean validateToken(String token, String expectedTokenType) {
         try {
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
+            Claims claims = getClaims(token);
+            String tokenType = claims.get(TOKEN_TYPE, String.class);
 
-            String tokenType = claims.get("token_type", String.class);
-            if (tokenType == null) {
-                System.out.println("Token không có loại xác định (token_type)");
-                return false;
-            }
-
-            if (!tokenType.equals(expectedTokenType)) {
-                System.out.println("Loại token không khớp: " + tokenType);
+            if (tokenType == null || !tokenType.equals(expectedTokenType)) {
+                log.warn("Token type mismatch or missing: expected [{}], found [{}]", expectedTokenType, tokenType);
                 return false;
             }
 
             return true;
 
-        } catch (ExpiredJwtException e) {
-            System.out.println("Token đã hết hạn: " + e.getMessage());
-        } catch (UnsupportedJwtException e) {
-            System.out.println("Token không hỗ trợ: " + e.getMessage());
-        } catch (MalformedJwtException e) {
-            System.out.println("Token bị lỗi: " + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            System.out.println("Lỗi tham số token: " + e.getMessage());
+        } catch (JwtException e) {
+            log.warn("Token validation failed: {}", e.getMessage());
+            return false;
         }
-        return false;
     }
 
-    // get userId from token return claims
     public String getUserIdFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
+        return getClaims(token).getSubject();
+    }
+
+    public UsersResponse timeOutToken
+            (Users user, String token, String refreshToken) {
+        UserInforResponse inforResponse = GenerateUser.generateUserInfor(user);
+
+        return new UsersResponse(
+                inforResponse,
+                generateToken(user, 0, ACCESS_TOKEN),
+                generateToken(user, 0, REFRESH_TOKEN)
+        );
+    }
+
+    private Key getSigningKey() {
+        return Keys.hmacShaKeyFor
+                (secretKey.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private Claims getClaims(String token) {
+        return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-        return claims.getSubject();
-    }
-
-    // Timeout token
-    public UsersResponse TimeOutToken(Users users, String token, String refreshToken) {
-        UserInforResponse inforResponse = GenerateUser.generateUserInfor(users);
-        return new UsersResponse(
-                inforResponse,
-                generateToken(users, TOKEN_EXPIRATION, ACCESS_TOKEN),
-                generateToken(users, TOKEN_EXPIRATION, REFRESH_TOKEN)
-        );
     }
 }
+

@@ -3,6 +3,7 @@ server:
   port: 8081
 # config application
 spring:
+
   application:
     name: auth-service
 #  config connect to database
@@ -28,3 +29,6 @@ eureka:
 logging:
   level:
     org.springframework.security : DEBUG
+# config private key
+jwt :
+  secret : SK40CSI2PC-D#?4klj50fdl3kd3ldư;l3ke

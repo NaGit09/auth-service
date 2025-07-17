@@ -2,13 +2,15 @@ package org.example.authservice.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.authservice.model.dto.APIResponse;
+import org.example.authservice.model.dto.user.UserInforResponse;
+import org.example.authservice.model.dto.user.UserUpdateAvatar;
 import org.example.authservice.service.UserService;
 import org.example.authservice.utils.GenerateResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/auth-service/users")
@@ -17,12 +19,26 @@ public class UserController {
     @Autowired
     private final UserService userService;
 
-    @GetMapping("/user-info/{id}")
-    public ResponseEntity<?> getUsers(@PathVariable String id) {
+    @GetMapping("/infor/{id}")
+    public ResponseEntity<?> getUserInfo
+            (@PathVariable UUID id) {
 
-        return ResponseEntity.ok(new APIResponse<>(
+        UserInforResponse userInforResponse = userService.userInfor(id);
+        return GenerateResponse.generateSuccess
+                (200, "get user infor successfully", userInforResponse);
+    }
 
-        ));
+    @PutMapping("/update-avatar")
+    public ResponseEntity<?> updateAvatar
+            (@RequestBody UserUpdateAvatar userUpdateAvatar) {
+
+        UUID userId = userUpdateAvatar.getUserId();
+        String avatarUrl = userUpdateAvatar.getAvatarUrl();
+
+        UserInforResponse userInforResponse = userService.updateAvatar(userId, avatarUrl);
+
+        return GenerateResponse.generateSuccess
+                (200, "updateAvatar success", userInforResponse);
     }
 
     @PostMapping("/profile")
@@ -43,18 +59,5 @@ public class UserController {
         ));
     }
 
-    @PostMapping("/update-avatar/{id}")
-    public ResponseEntity<?> updateAvatar(@RequestBody Map<String, String> body) {
-        if (body == null) {
-            return GenerateResponse.generateError(401, "Body is null");
-        }
-        String url = body.get("url");
-        if (url == null) {
-            return GenerateResponse.generateError(401, "url is null");
-        }
-        return ResponseEntity.ok(new APIResponse<>(
-
-        ));
-    }
 
 }

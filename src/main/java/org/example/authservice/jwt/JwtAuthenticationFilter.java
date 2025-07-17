@@ -33,51 +33,57 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtils jwtUtil;
     private final UsersRepository userRepository;
     private final CustomUserDetailsService userDetailsService;
+
     private static final List<String> PUBLIC_PATHS = List.of(
-            "/auth-service/auth/login", "/auth-service/auth/register", "/auth-service/auth/refresh-token"
+            "/auth-service/auth/login", "/auth-service/auth/register",
+            "/auth-service/auth/refresh-token", "/auth-service/auth/infor"
     );
 
-    // filter request
+    private static final String TOKEN_TYPE = "access_token";
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        // skip request is not authenticated
         String path = request.getServletPath();
-        if (PUBLIC_PATHS.contains(path)) {
+        boolean isPublic = PUBLIC_PATHS.stream().anyMatch(path::startsWith);
+
+        if (isPublic) {
             filterChain.doFilter(request, response);
             return;
         }
-        // check header
+
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            handleError(response, "Missing token");
+            handleError(response, "Missing or invalid Authorization header");
             return;
         }
 
         String token = authHeader.substring(7);
-        // check token type
+
         try {
-            if (!jwtUtil.validateToken(token, "access_token")) {
+            if (!jwtUtil.validateToken(token, TOKEN_TYPE)) {
                 handleError(response, "Invalid token");
                 return;
             }
 
             String userId = jwtUtil.getUserIdFromToken(token);
+            Users user = userRepository.findById(UUID.fromString(userId))
+                    .orElse(null);
 
-            Optional<Users> users = userRepository.findById(UUID.fromString(userId));
-            Users user = users.orElse(null);
+            if (user == null) {
+                handleError(response, "User not found");
+                return;
+            }
 
-            // required, if not this 403 error.
             if (SecurityContextHolder.getContext().getAuthentication() == null) {
-                assert user != null;
-                // get user with UserDetailService
                 CustomUserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
-                // authentication and authorization with user entity
+
                 UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken
-                                (userDetails, null, userDetails.getAuthorities());
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities()
+                        );
+
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                // add auth token in Security context holder
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
 
@@ -85,22 +91,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             handleError(response, "Token error: " + e.getMessage());
             return;
         }
+
         filterChain.doFilter(request, response);
     }
 
     private void handleError(HttpServletResponse response, String message) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json;charset=UTF-8");
 
-        // Create a map with the status and message
-        Map<String, Object> errorResponse = Map.of("status", HttpServletResponse.SC_UNAUTHORIZED, "message", message);
+        Map<String, Object> errorResponse = Map.of(
+                "status", HttpServletResponse.SC_UNAUTHORIZED,
+                "message", message
+        );
 
-        // Convert the map to a JSON string using ObjectMapper
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonResponse = objectMapper.writeValueAsString(errorResponse);
-
-        // Write the JSON response
-        response.setContentType("application/json");
-        response.getWriter().println(jsonResponse);
+        new ObjectMapper().writeValue(response.getWriter(), errorResponse);
     }
 }
+
 

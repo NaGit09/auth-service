@@ -1,4 +1,4 @@
-package org.example.authservice.model.dto;
+package org.example.authservice.model.dto.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.example.authservice.constant.Mode;
 import org.example.authservice.constant.Role;
-import org.example.authservice.model.dto.UserInforResponse;
+import org.example.authservice.model.dto.user.UserInforResponse;
 import org.example.authservice.model.entity.Users;
 import org.springframework.stereotype.Component;
 
@@ -33,11 +33,8 @@ public class GenerateUser {
     public static UserInforResponse generateUserInfor(Users users) {
         UserInforResponse user_infor = new UserInforResponse();
         user_infor.setUserId(users.getId());
-        user_infor.setFull_name(users.getFullName());
         user_infor.setAvatar_url(users.getAvatarUrl());
-        user_infor.setEmail(users.getEmail());
         user_infor.setUsername(users.getUsername());
-        user_infor.setRole(users.getRole());
         return user_infor;
     }
 }

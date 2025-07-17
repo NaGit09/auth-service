@@ -10,8 +10,10 @@ import org.example.authservice.model.repository.FollowsRequestsRepository;
 import java.util.UUID;
 
 public class GenerateFollows {
-    public static void generateUserRequest(Users userRequest, Users userTarget,
-                                           FollowsRequestsRepository followsRequestsRepository) {
+    public static void generateUserRequest
+            (Users userRequest, Users userTarget,
+             FollowsRequestsRepository followsRequestsRepository) {
+
         FollowRequest request = new FollowRequest();
         request.setId(UUID.randomUUID());
         request.setTarget(userTarget);
@@ -20,8 +22,10 @@ public class GenerateFollows {
         followsRequestsRepository.save(request);
     }
 
-    public static void generateUserFollow(Users userRequest, Users userTarget,
-                                          FollowsRepository followsRepository) {
+    public static void generateUserFollow
+            (Users userRequest, Users userTarget,
+             FollowsRepository followsRepository) {
+
         Follows follow = new Follows();
         follow.setFollower(userRequest);
         follow.setFollowing(userTarget);

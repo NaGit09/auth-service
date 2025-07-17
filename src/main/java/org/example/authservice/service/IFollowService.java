@@ -1,6 +1,6 @@
 package org.example.authservice.service;
 
-import org.example.authservice.model.dto.FollowRequestClient;
+import org.example.authservice.model.dto.follow.FollowRequestClient;
 
 import java.util.UUID;
 
