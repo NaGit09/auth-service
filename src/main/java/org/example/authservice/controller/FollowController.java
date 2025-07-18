@@ -18,7 +18,7 @@ public class FollowController {
     FollowService followService;
 
 
-    @PostMapping("/follows-user")
+    @PostMapping("/follows")
     public ResponseEntity<?> followUser
             (@RequestBody FollowRequestClient followRequestClient) {
         boolean follow = followService.followUser(followRequestClient);
@@ -27,7 +27,7 @@ public class FollowController {
                 (200, "Follow successfully !", follow);
     }
 
-    @PostMapping("/unfollow-user")
+    @PostMapping("/unfollow")
     public ResponseEntity<?> unfollowUser
             (@RequestBody FollowRequestClient followRequestClient) {
 
@@ -37,7 +37,7 @@ public class FollowController {
                 "Unfollow successfully !", unfollow);
     }
 
-    @GetMapping("/total-followers/{id}")
+    @GetMapping("/followers/{id}")
     public ResponseEntity<?> totalFollowers(@PathVariable UUID id) {
 
         Integer total = followService.totalFollower(id);
@@ -46,7 +46,7 @@ public class FollowController {
                 "get total followers successfully !", total);
     }
 
-    @GetMapping("/total-followings/{id}")
+    @GetMapping("/followings/{id}")
     public ResponseEntity<?> totalFollowings(@PathVariable UUID id) {
         Integer total = followService.totalFollowing(id);
 
